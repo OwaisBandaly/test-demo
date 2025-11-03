@@ -1,8 +1,12 @@
-# ==============================================
+# ==========================================================
 # 🧠 MACHINE LEARNING ASSIGNMENT (Q5A–8B)
-# ==============================================
+# ==========================================================
+# Name: _______________________
+# Roll No: ____________________
+# Subject: Machine Learning
+# ==========================================================
 
-# Import common libraries
+# Common Imports
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -11,12 +15,12 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# ==============================================
+# ==========================================================
 # 5A) Naïve Bayes Classifier (Categorical Data)
-# ==============================================
+# ==========================================================
 from sklearn.naive_bayes import CategoricalNB
 
-print("\n===== 5A) Naïve Bayes Classifier =====")
+print("\n===== 5A) Naïve Bayes Classifier (Categorical Data) =====")
 
 data = {
     'Age Group': ['Young', 'Young', 'Middle', 'Young', 'Middle', 'Senior', 'Senior', 'Middle', 'Young', 'Middle'],
@@ -45,85 +49,79 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 # Model
 model = CategoricalNB()
 model.fit(X_train, y_train)
-
-# Predictions
 y_pred = model.predict(X_test)
 
 # Results
 print("Predictions:", le_class.inverse_transform(y_pred))
 print("Actual:", le_class.inverse_transform(y_test))
-print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Accuracy:", round(accuracy_score(y_test, y_pred), 2))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
-# ==============================================
+# ==========================================================
 # 5B) Gaussian Naïve Bayes Classifier (Loan Dataset)
-# ==============================================
+# ==========================================================
 from sklearn.naive_bayes import GaussianNB
 
 print("\n===== 5B) Gaussian Naïve Bayes (Loan Dataset) =====")
 
-# Load dataset (replace with your file path)
 df = pd.read_csv("loan.csv")
+
+# Handle missing values
+for col in df.columns:
+    if df[col].dtype == 'object':
+        df[col] = df[col].fillna(df[col].mode()[0])
+    else:
+        df[col] = df[col].fillna(df[col].mean())
 
 # Features and Target
 X = df.drop('Loan_Status', axis=1)
 y = df['Loan_Status']
 
-# Handle missing values
-for col in X.columns:
-    if X[col].dtype == 'object':
-        X[col].fillna(X[col].mode()[0], inplace=True)
-    else:
-        X[col].fillna(X[col].mean(), inplace=True)
-
 # Encode categorical features
 le = LabelEncoder()
 for col in X.columns:
     if X[col].dtype == 'object':
-        X[col] = le.fit_transform(X[col].astype(str))
+        X[col] = le.fit_transform(X[col])
 
 y = LabelEncoder().fit_transform(y.astype(str))
 
-# Train-Test Split
+# Split and Train
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Model
 model = GaussianNB()
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 
 # Evaluation
-print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Accuracy:", round(accuracy_score(y_test, y_pred), 2))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 print("Classification Report:\n", classification_report(y_test, y_pred))
 
-# ==============================================
+# ==========================================================
 # 6) K-Means Clustering Algorithm
-# ==============================================
+# ==========================================================
 from sklearn.cluster import KMeans
 
 print("\n===== 6) K-Means Clustering =====")
 
 df = pd.read_csv("housing.csv")
 
-# Encode 'ocean_proximity' if present
+# Encode if needed
 if 'ocean_proximity' in df.columns:
-    le = LabelEncoder()
-    df['ocean_proximity'] = le.fit_transform(df['ocean_proximity'])
+    df['ocean_proximity'] = LabelEncoder().fit_transform(df['ocean_proximity'])
 
-# Select numeric columns only
-df_num = df.select_dtypes(include=['float64', 'int64']).fillna(df.mean())
+# Numeric columns only
+df_num = df.select_dtypes(include=[np.number]).fillna(df.mean(numeric_only=True))
 
 # Apply K-Means
-k = 4
-kmeans = KMeans(n_clusters=k, random_state=42)
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
 labels = kmeans.fit_predict(df_num)
 
-print("Cluster Labels:", labels[:10])  # Show first 10 labels
+print("Cluster Labels (first 10):", labels[:10])
 
-# ==============================================
+# ==========================================================
 # 7) Support Vector Machine (SVM)
-# ==============================================
+# ==========================================================
 from sklearn.svm import SVC
 
 print("\n===== 7) Support Vector Machine =====")
@@ -131,18 +129,16 @@ print("\n===== 7) Support Vector Machine =====")
 data = pd.read_csv("data.csv")
 data = data.drop(['id', 'Unnamed: 32'], axis=1, errors='ignore')
 
-# Handle missing values
+# Fill missing values
 for col in data.columns:
     if data[col].dtype == 'object':
-        data[col].fillna(data[col].mode()[0], inplace=True)
+        data[col] = data[col].fillna(data[col].mode()[0])
     else:
-        data[col].fillna(data[col].median(), inplace=True)
+        data[col] = data[col].fillna(data[col].median())
 
-# Encode categorical columns
-le = LabelEncoder()
-for col in data.columns:
-    if data[col].dtype == 'object':
-        data[col] = le.fit_transform(data[col].astype(str))
+# Encode categorical
+for col in data.select_dtypes(include='object').columns:
+    data[col] = LabelEncoder().fit_transform(data[col])
 
 # Split
 X = data.drop('diagnosis', axis=1)
@@ -154,7 +150,7 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Train Model
+# Model
 model = SVC(kernel='rbf', random_state=42)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
@@ -164,26 +160,24 @@ print("Accuracy:", round(accuracy_score(y_test, y_pred) * 100, 2), "%")
 print("Classification Report:\n", classification_report(y_test, y_pred))
 
 # Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
-sns.heatmap(cm, annot=True, cmap="Blues", fmt="d")
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, cmap="Blues", fmt="d")
 plt.title("SVM Confusion Matrix")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.show()
 
-# ==============================================
+# ==========================================================
 # 8A) Ensemble Learning – Bagging (Random Forest)
-# ==============================================
+# ==========================================================
 from sklearn.ensemble import RandomForestClassifier
 
 print("\n===== 8A) Ensemble Learning (Bagging - Random Forest) =====")
 
 data = pd.read_csv("loan_data.csv").dropna()
 
-# Encode categorical features
-le = LabelEncoder()
+# Encode categorical
 for col in data.select_dtypes(include='object').columns:
-    data[col] = le.fit_transform(data[col])
+    data[col] = LabelEncoder().fit_transform(data[col])
 
 X = data.drop('not.fully.paid', axis=1)
 y = data['not.fully.paid']
@@ -194,21 +188,22 @@ rf = RandomForestClassifier(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 y_pred = rf.predict(X_test)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Accuracy:", round(accuracy_score(y_test, y_pred), 2))
 print("Classification Report:\n", classification_report(y_test, y_pred))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
-# ==============================================
+# ==========================================================
 # 8B) Ensemble Learning – Boosting & Blending
-# ==============================================
+# ==========================================================
 from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
 
 print("\n===== 8B) Ensemble Learning (Boosting & Blending) =====")
 
 data = pd.read_csv("loan_data.csv").dropna()
-le = LabelEncoder()
+
+# Encode
 for col in data.select_dtypes(include='object').columns:
-    data[col] = le.fit_transform(data[col])
+    data[col] = LabelEncoder().fit_transform(data[col])
 
 X = data.drop('not.fully.paid', axis=1)
 y = data['not.fully.paid']
@@ -218,18 +213,19 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 ada = AdaBoostClassifier(n_estimators=100, learning_rate=0.5, random_state=42)
 ada.fit(X_train, y_train)
 y_pred_ada = ada.predict(X_test)
-print("\nAdaBoost Accuracy:", accuracy_score(y_test, y_pred_ada))
+print("AdaBoost Accuracy:", round(accuracy_score(y_test, y_pred_ada), 2))
 
 # Gradient Boosting
 gb = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, random_state=42)
 gb.fit(X_train, y_train)
 y_pred_gb = gb.predict(X_test)
-print("\nGradient Boosting Accuracy:", accuracy_score(y_test, y_pred_gb))
+print("Gradient Boosting Accuracy:", round(accuracy_score(y_test, y_pred_gb), 2))
 
-# Blending (RF + AdaBoost + GB)
+# Random Forest (for blending)
 rf = RandomForestClassifier(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 
+# Blending
 rf_pred = rf.predict_proba(X_test)[:, 1]
 ada_pred = ada.predict_proba(X_test)[:, 1]
 gb_pred = gb.predict_proba(X_test)[:, 1]
@@ -237,6 +233,6 @@ gb_pred = gb.predict_proba(X_test)[:, 1]
 final_pred = (rf_pred + ada_pred + gb_pred) / 3
 final_pred_label = np.where(final_pred > 0.5, 1, 0)
 
-print("\nBlending (RF + AdaBoost + GB) Accuracy:", accuracy_score(y_test, final_pred_label))
+print("\nBlending (RF + AdaBoost + GB) Accuracy:", round(accuracy_score(y_test, final_pred_label), 2))
 print("Classification Report:\n", classification_report(y_test, final_pred_label))
 print("Confusion Matrix:\n", confusion_matrix(y_test, final_pred_label))
